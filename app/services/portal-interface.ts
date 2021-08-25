@@ -257,15 +257,25 @@ export default class PortalInterface {
     public async accept(user: CurrentUser): Promise<void> {
         if (!user.token) throw new Error(`no token for account`);
 
-        await this.query({
-            authenticated: true,
-            token: user.token,
-            method: "PATCH",
-            url: `/users/${user.portalId}/accept-tnc`,
-            data: {
-                accept: true,
-            },
-        });
+        try {
+            await this.query({
+                authenticated: true,
+                token: user.token,
+                method: "PATCH",
+                url: `/users/${user.portalId}/accept-tnc`,
+                data: {
+                    accept: true,
+                },
+            });
+        }
+        catch(error: AxiosError) {
+            // temp fix until prod deploy
+            if (Config.env.developer && error.response.status === 404) {
+                const self = await this.whoAmI(user.token);
+
+                this.store.commit(MutationTypes.SET_CURRENT_USER, self);
+            }
+        }
 
         const self = await this.whoAmI(user.token);
 
