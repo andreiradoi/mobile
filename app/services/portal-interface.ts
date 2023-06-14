@@ -231,8 +231,17 @@ export default class PortalInterface {
             });
     }
 
-    public async logout(): Promise<void> {
+    public async logoutAllAccounts(): Promise<void> {
         await this.store.dispatch(ActionTypes.LOGOUT_ACCOUNTS);
+    }
+
+    public async logoutCurrentUser(): Promise<void> {
+
+        if (!this.currentUser) {
+            return;
+        }
+
+        await this.store.dispatch(ActionTypes.REMOVE_ACCOUNT, this.currentUser.email);
     }
 
     public async forgotPassword(payload: { email: string }): Promise<void> {
@@ -649,7 +658,7 @@ export default class PortalInterface {
 
         if (original.refreshed === true) {
             debug.log("try-refresh: refresh failed, clear token");
-            return this.logout().then(() => Promise.reject(new AuthenticationError("refresh token failed")));
+            return this.logoutCurrentUser().then(() => Promise.reject(new AuthenticationError("refresh token failed")));
         }
 
         const requestBody = {
@@ -682,7 +691,7 @@ export default class PortalInterface {
                             okButtonText: _L("ok"),
                         });
                     }
-                    return this.logout().then(() => {
+                    return this.logoutCurrentUser().then(() => {
                         return Promise.reject(error);
                     });
                 }

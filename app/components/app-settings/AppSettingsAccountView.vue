@@ -96,6 +96,7 @@ export default Vue.extend({
             return this.$s.state.portal.currentUser;
         },
         accounts(): CurrentUser[] {
+            console.log("radoi accs", this.$s.state.portal.accounts);
             return this.$s.state.portal.accounts;
         },
     },
@@ -105,6 +106,7 @@ export default Vue.extend({
         SettingsItemIconText,
     },
     async mounted(): Promise<void> {
+        console.log("radoi mounted account view");
         void this.$s.dispatch(ActionTypes.REFRESH_ACCOUNTS);
     },
     methods: {
@@ -165,7 +167,7 @@ export default Vue.extend({
                 cancelButtonText: _L("no"),
             });
             if (yesNo) {
-                await Services.PortalInterface().logout();
+                await Services.PortalInterface().logoutAllAccounts();
             }
         },
     },
